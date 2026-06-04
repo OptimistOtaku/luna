@@ -1,0 +1,8 @@
+{
+  "name": "Luna Period Companion",
+  "description": "An active, predictive period tracking companion and AI health advisor with a smart remedy correlation engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
