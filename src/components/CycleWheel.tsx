@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { CyclePhase } from "../types";
 import { ChevronLeft, ChevronRight, Activity, Calendar } from "lucide-react";
 
@@ -58,6 +58,8 @@ interface CycleWheelProps {
 export default function CycleWheel({ currentDay, onDayChange, maxCycleDays = 28 }: CycleWheelProps) {
   const totalDays = maxCycleDays;
   const phaseInfo = getCyclePhase(currentDay);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // SVG parameters for the ring
   const size = 260;
@@ -95,6 +97,49 @@ export default function CycleWheel({ currentDay, onDayChange, maxCycleDays = 28 
     onDayChange(currentDay === 1 ? totalDays : currentDay - 1);
   };
 
+  const handlePointerDown = (e: React.PointerEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button")) return;
+
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    handlePointerUpdate(e);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    handlePointerUpdate(e);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  const handlePointerUpdate = (e: React.PointerEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    
+    let angleRad = Math.atan2(dy, dx);
+    let angleDeg = (angleRad * 180) / Math.PI;
+    
+    // Align with standard -90 deg starting at top center
+    let normalizedAngle = angleDeg + 90;
+    if (normalizedAngle < 0) {
+      normalizedAngle += 360;
+    }
+    
+    // Map 0-360 degrees to 1-totalDays
+    let dayFraction = (normalizedAngle / 360) * totalDays;
+    let day = Math.round(dayFraction) + 1;
+    if (day > totalDays) day = 1;
+    onDayChange(day);
+  };
+
   return (
     <div className="bg-white rounded-3xl p-6 border border-stone-100 flex flex-col items-center shadow-[0_4px_24px_rgba(40,40,30,0.03)]" id="luna-cycle-wheel">
       <div className="w-full flex justify-between items-center mb-6">
@@ -108,7 +153,14 @@ export default function CycleWheel({ currentDay, onDayChange, maxCycleDays = 28 
       </div>
 
       {/* Circle Stage */}
-      <div className="relative w-[260px] h-[260px] flex items-center justify-center select-none">
+      <div 
+        ref={containerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className="relative w-[260px] h-[260px] flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+        id="luna-wheel-stage"
+      >
         
         {/* Soft background ambient gradient glow linking to phase color */}
         <div 
@@ -256,7 +308,7 @@ export default function CycleWheel({ currentDay, onDayChange, maxCycleDays = 28 
 
 // Helpers to draw SVG paths easily
 function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+  const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
   return {
     x: centerX + radius * Math.cos(angleInRadians),
     y: centerY + radius * Math.sin(angleInRadians),
