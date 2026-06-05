@@ -14,8 +14,7 @@ const AVAILABLE_GOALS = [
   "Cycle tracking and fertility awareness"
 ];
 
-// Reference the actual generated hero image path
-const HERO_IMAGE_PATH = "/src/assets/images/luna_wellness_hero_1780588758088.png";
+import HERO_IMAGE_PATH from "../assets/images/luna_wellness_hero_1780588758088.png";
 
 export default function Onboarding({ onComplete }: OnboardingProps) {
   const [step, setStep] = useState(1);

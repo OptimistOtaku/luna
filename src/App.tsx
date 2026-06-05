@@ -23,9 +23,8 @@ import {
   RotateCcw
 } from "lucide-react";
 
-// Paths of the generated visual assets
-const WELLNESS_HERO_IMAGE = "/src/assets/images/luna_wellness_hero_1780588758088.png";
-const USER_PORTRAIT_IMAGE = "/src/assets/images/luna_user_portrait_1780588774842.png";
+import WELLNESS_HERO_IMAGE from "./assets/images/luna_wellness_hero_1780588758088.png";
+import USER_PORTRAIT_IMAGE from "./assets/images/luna_user_portrait_1780588774842.png";
 
 export default function App() {
   // User Profile loaded directly from key storage
